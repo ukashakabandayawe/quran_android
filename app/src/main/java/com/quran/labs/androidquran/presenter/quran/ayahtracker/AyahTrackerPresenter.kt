@@ -6,12 +6,14 @@ import android.view.MotionEvent
 import android.widget.ImageView
 import com.quran.data.core.QuranInfo
 import com.quran.data.dao.BookmarksDao
+import com.quran.data.dao.VerseNotesDao
 import com.quran.data.di.QuranPageScope
 import com.quran.data.model.AyahGlyph.AyahEndGlyph
 import com.quran.data.model.AyahGlyph.WordGlyph
 import com.quran.data.model.AyahWord
 import com.quran.data.model.SuraAyah
 import com.quran.data.model.bookmark.Bookmark
+import com.quran.data.model.bookmark.VerseNote
 import com.quran.data.model.highlight.HighlightInfo
 import com.quran.data.model.highlight.HighlightType
 import com.quran.data.model.selection.AyahSelection
@@ -46,10 +48,14 @@ import com.quran.recitation.presenter.RecitationPopupPresenter.PopupContainer
 import com.quran.recitation.presenter.RecitationPresenter
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 @QuranPageScope
 class AyahTrackerPresenter @Inject constructor(
@@ -59,6 +65,7 @@ class AyahTrackerPresenter @Inject constructor(
   private val quranSettings: QuranSettings,
   private val readingEventPresenter: ReadingEventPresenter,
   private val bookmarksDao: BookmarksDao,
+  private val verseNotesDao: VerseNotesDao,
   private val audioStatusRepository: AudioStatusRepository,
   recitationPresenter: RecitationPresenter,
   private val recitationEventPresenter: RecitationEventPresenter,
@@ -90,6 +97,21 @@ class AyahTrackerPresenter @Inject constructor(
       bookmarksDao.bookmarksForPage(trackerItem.page)
         .onEach { bookmarks -> onBookmarksChanged(bookmarks) }
         .launchIn(scope)
+    }
+
+    launchNotesObservation()
+  }
+
+  private fun launchNotesObservation() {
+    scope.launch {
+      try {
+        onNotesChanged(withContext(Dispatchers.IO) { verseNotesDao.notes() })
+        verseNotesDao.changes.collect {
+          onNotesChanged(withContext(Dispatchers.IO) { verseNotesDao.notes() })
+        }
+      } catch (throwable: Throwable) {
+        Timber.e(throwable, "Error observing verse notes")
+      }
     }
   }
 
@@ -189,6 +211,21 @@ class AyahTrackerPresenter @Inject constructor(
           .toSet()
         if (elements.isNotEmpty()) {
           tracker.onHighlightAyat(tracker.page, elements, HighlightTypes.BOOKMARK)
+        }
+      }
+    }
+  }
+
+  private fun onNotesChanged(notes: List<VerseNote>) {
+    unHighlightAyahs(HighlightTypes.NOTE)
+    if (quranSettings.shouldHighlightBookmarks()) {
+      items.forEach { tracker ->
+        val elements = notes
+          .filter { it -> quranInfo.getPageFromSuraAyah(it.sura, it.ayah) == tracker.page }
+          .map { "${it.sura}:${it.ayah}" }
+          .toSet()
+        if (elements.isNotEmpty()) {
+          tracker.onHighlightAyat(tracker.page, elements, HighlightTypes.NOTE)
         }
       }
     }

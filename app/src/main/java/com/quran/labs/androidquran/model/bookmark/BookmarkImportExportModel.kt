@@ -6,6 +6,7 @@ import androidx.core.content.FileProvider
 import com.quran.data.dao.BookmarkSortOrder
 import com.quran.data.dao.BookmarksDao
 import com.quran.data.dao.ReadingBookmarksDao
+import com.quran.data.dao.VerseNotesDao
 import com.quran.data.dao.RecentPagesDao
 import com.quran.data.dao.Settings
 import com.quran.data.model.bookmark.BackupReadingBookmark
@@ -29,6 +30,7 @@ class BookmarkImportExportModel @Inject internal constructor(
   @param:ApplicationContext private val appContext: Context,
   private val jsonModel: BookmarkJsonModel,
   private val bookmarksDao: BookmarksDao,
+  private val verseNotesDao: VerseNotesDao,
   private val recentPagesDao: RecentPagesDao,
   private val readingBookmarksDao: ReadingBookmarksDao,
   private val settings: Settings,
@@ -101,6 +103,7 @@ class BookmarkImportExportModel @Inject internal constructor(
           tags = bookmarksDao.tags(),
           bookmarks = bookmarksDao.bookmarks(BookmarkSortOrder.SORT_DATE_ADDED)
             .filterNot { bookmark -> bookmark.isPageBookmark() },
+          notes = verseNotesDao.notes(),
           recentPages = recentPagesDao.recentPages(),
           readingBookmark = readingBookmarksDao.readingBookmark()
             ?.let(BackupReadingBookmark::fromReadingBookmark),
@@ -124,6 +127,7 @@ class BookmarkImportExportModel @Inject internal constructor(
     if (!importData.isEmpty()) {
       mobileSyncImporter.importData(importData, deleteExisting = false)
     }
+    verseNotesDao.replaceNotes(data.notes)
   }
 
   companion object {

@@ -103,6 +103,7 @@ class QuranPageFragment : Fragment(), PageController, QuranPage, QuranPageScreen
       quranPageLayout.updateView(quranSettings)
       if (!quranSettings.highlightBookmarks()) {
         imageView?.unHighlight(HighlightTypes.BOOKMARK)
+        imageView?.unHighlight(HighlightTypes.NOTE)
       }
       quranPagePresenter.refresh()
     }

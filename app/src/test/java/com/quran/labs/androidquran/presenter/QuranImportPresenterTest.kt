@@ -11,6 +11,7 @@ import com.quran.labs.androidquran.fakes.FakeContentResolverOps
 import com.quran.labs.androidquran.fakes.FakePageProvider
 import com.quran.labs.androidquran.fakes.FakeReadingBookmarksDao
 import com.quran.labs.androidquran.fakes.FakeRecentPagesDao
+import com.quran.labs.androidquran.fakes.FakeVerseNotesDao
 import com.quran.labs.androidquran.model.bookmark.BookmarkImportExportModel
 import com.quran.labs.androidquran.model.bookmark.BookmarkJsonModel
 import com.quran.labs.awaitTerminalEvent
@@ -53,6 +54,7 @@ class QuranImportPresenterTest {
       context,
       BookmarkJsonModel(),
       FakeBookmarksDao(),
+      FakeVerseNotesDao(),
       FakeRecentPagesDao(),
       FakeReadingBookmarksDao(),
       settings,

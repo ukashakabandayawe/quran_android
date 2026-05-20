@@ -10,6 +10,7 @@ import com.quran.data.di.AppScope
 import com.quran.labs.androidquran.BookmarksDatabase
 import com.quran.mobile.bookmark.Bookmarks
 import com.quran.mobile.bookmark.Last_pages
+import com.quran.mobile.bookmark.Notes
 import com.quran.mobile.di.qualifier.ApplicationContext
 import com.quran.shared.persistence.repository.bookmark.repository.BookmarksRepository
 import com.quran.shared.persistence.repository.collection.repository.CollectionsRepository
@@ -46,9 +47,11 @@ class BookmarkDataModule {
     return BookmarksDatabase(
       driver,
       Bookmarks.Adapter(IntColumnAdapter, IntColumnAdapter, IntColumnAdapter),
-      Last_pages.Adapter(IntColumnAdapter)
+      Last_pages.Adapter(IntColumnAdapter),
+      Notes.Adapter(IntColumnAdapter, IntColumnAdapter)
     )
   }
+
 
   @SingleIn(AppScope::class)
   @Provides

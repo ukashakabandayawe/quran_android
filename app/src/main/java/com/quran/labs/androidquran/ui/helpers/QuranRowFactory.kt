@@ -104,4 +104,29 @@ class QuranRowFactory @Inject constructor(
       .withText(context.getString(R.string.not_tagged))
       .build()
   }
+
+  fun fromNotesHeader(context: Context): QuranRow {
+    return QuranRow.Builder()
+      .withType(QuranRow.HEADER)
+      .withText(context.getString(R.string.notes))
+      .build()
+  }
+
+  fun fromNote(context: Context, note: com.quran.data.model.bookmark.VerseNote): QuranRow {
+    val page = quranInfo.getPageFromSuraAyah(note.sura, note.ayah)
+    val title = if (note.note.length > 100) note.note.substring(0, 100) + "..." else note.note
+    val metadata = quranDisplayData.getAyahMetadata(note.sura, note.ayah, page, context)
+
+    return QuranRow.Builder()
+      .withText(title)
+      .withMetadata(metadata)
+      .withType(QuranRow.NOTE)
+      .withAyah(note.ayah)
+      .withSura(note.sura)
+      .withPage(page)
+      .withDate(note.timestamp)
+      .withImageResource(R.drawable.ic_edit)
+      .withImageOverlayColorResource(R.color.icon_tint)
+      .build()
+  }
 }

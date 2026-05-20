@@ -297,6 +297,8 @@ class BookmarksFragment : Fragment(), QuranTouchListener {
       val quranActivity = activity
       if (row.isAyahBookmark) {
         quranActivity.jumpToAndHighlight(row.page, row.sura, row.ayah)
+      } else if (row.isNote()) {
+        quranActivity.jumpTo(row.page)
       } else {
         quranActivity.jumpTo(row.page)
       }

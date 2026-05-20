@@ -1762,6 +1762,12 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
         toggleAyahBookmark(startSuraAyah, startPage)
       } else if (itemId == com.quran.labs.androidquran.common.toolbar.R.id.cab_tag_ayah) {
         sliderPage = slidingPagerAdapter.getPagePosition(SlidingPagerAdapter.TAG_PAGE)
+      } else if (itemId == com.quran.labs.androidquran.common.toolbar.R.id.cab_note_ayah) {
+        // Find the page index for the notes provider (order may vary); fallback to previous constant
+        sliderPage = slidingPagerAdapter.getIndexForOrder(SlidingPagerAdapter.TRANSCRIPT_PAGE + 1)
+        if (sliderPage < 0) {
+          sliderPage = slidingPagerAdapter.getPagePosition(SlidingPagerAdapter.TRANSCRIPT_PAGE + 1)
+        }
       } else if (itemId == com.quran.labs.androidquran.common.toolbar.R.id.cab_translate_ayah) {
         sliderPage =
           slidingPagerAdapter.getPagePosition(SlidingPagerAdapter.TRANSLATION_PAGE)

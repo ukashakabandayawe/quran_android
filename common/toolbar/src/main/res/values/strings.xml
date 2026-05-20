@@ -9,4 +9,5 @@
   <string name="recite_from_here">Recite from here</string>
   <string name="search_key">Press the search key to look up a verse</string>
   <string name="copy_ayah">Copy Ayah</string>
+  <string name="note_ayah">Add Note to this Ayah</string>
 </resources>

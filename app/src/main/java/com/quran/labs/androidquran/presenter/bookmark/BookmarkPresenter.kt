@@ -8,6 +8,8 @@ import com.quran.data.dao.RecentPagesDao
 import com.quran.data.model.bookmark.Bookmark
 import com.quran.data.model.bookmark.BookmarkData
 import com.quran.data.model.bookmark.RecentPage
+import com.quran.data.dao.VerseNotesDao
+import com.quran.data.model.bookmark.VerseNote
 import com.quran.data.model.bookmark.Tag
 import com.quran.labs.androidquran.dao.bookmark.BookmarkRawResult
 import com.quran.labs.androidquran.dao.bookmark.BookmarkRowData
@@ -36,6 +38,7 @@ import java.util.concurrent.TimeUnit
 open class BookmarkPresenter @Inject internal constructor(
   private val bookmarksDao: BookmarksDao,
   private val recentPagesDao: RecentPagesDao,
+  private val verseNotesDao: VerseNotesDao,
   private val quranSettings: QuranSettings,
   private val arabicDatabaseUtils: Provider<ArabicDatabaseUtils>,
 ) : Presenter<BookmarksFragment> {
@@ -78,6 +81,17 @@ open class BookmarkPresenter @Inject internal constructor(
           }
       } catch (throwable: Throwable) {
         Timber.e(throwable, "Error observing recent page changes")
+      }
+    }
+
+    presenterScope.launch {
+      try {
+        // observe note changes
+        verseNotesDao.changes.collect {
+          onObservedDataChanged()
+        }
+      } catch (throwable: Throwable) {
+        Timber.e(throwable, "Error observing verse note changes")
       }
     }
   }
@@ -333,7 +347,8 @@ open class BookmarkPresenter @Inject internal constructor(
       runBlocking {
         BookmarkData(
           tags = bookmarksDao.tags(),
-          bookmarks = bookmarksDao.bookmarks(sortOrder)
+          bookmarks = bookmarksDao.bookmarks(sortOrder),
+          notes = verseNotesDao.notes()
         )
       }
     }.subscribeOn(Schedulers.io())
@@ -403,6 +418,15 @@ open class BookmarkPresenter @Inject internal constructor(
       getRowDataSortedByTags(data.tags, data.bookmarks)
     } else {
       getSortedRowData(data.bookmarks)
+    }
+
+    // Append notes section
+    val notes = data.notes
+    if (!notes.isNullOrEmpty()) {
+      rows.add(BookmarkRowData.NotesHeader)
+      for (note in notes) {
+        rows.add(BookmarkRowData.NoteItem(note))
+      }
     }
 
     val recentPages = data.recentPages

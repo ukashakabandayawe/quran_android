@@ -41,6 +41,10 @@ class BookmarkUIConverter @Inject constructor(
           
         is BookmarkRowData.NotTaggedHeader ->
           quranRowFactory.fromNotTaggedHeader(context)
+        is BookmarkRowData.NotesHeader ->
+          quranRowFactory.fromNotesHeader(context)
+        is BookmarkRowData.NoteItem ->
+          quranRowFactory.fromNote(context, rowData.note)
       }
     }
     

@@ -13,6 +13,7 @@ public class QuranRow {
   public static final int PAGE_BOOKMARK = 2;
   public static final int AYAH_BOOKMARK = 3;
   public static final int BOOKMARK_HEADER = 4;
+  public static final int NOTE = 5;
 
   public int sura;
   public int ayah;
@@ -75,6 +76,11 @@ public class QuranRow {
 
     public Builder withSura(int sura) {
       this.sura = sura;
+      return this;
+    }
+
+    public Builder withAyah(int ayah) {
+      this.ayah = ayah;
       return this;
     }
 
@@ -154,5 +160,9 @@ public class QuranRow {
 
   public boolean isAyahBookmark() {
     return rowType == AYAH_BOOKMARK;
+  }
+
+  public boolean isNote() {
+    return rowType == NOTE;
   }
 }

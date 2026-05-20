@@ -13,6 +13,7 @@ import com.quran.data.model.bookmark.BookmarkData
 import com.quran.data.model.bookmark.PageReadingBookmark
 import com.quran.data.model.bookmark.RecentPage
 import com.quran.data.model.bookmark.Tag
+import com.quran.data.model.bookmark.VerseNote
 import com.quran.labs.BaseTestExtension
 import com.quran.labs.androidquran.R
 import com.quran.labs.androidquran.base.TestApplication
@@ -20,6 +21,7 @@ import com.quran.labs.androidquran.fakes.FakeBookmarksDao
 import com.quran.labs.androidquran.fakes.FakePageProvider
 import com.quran.labs.androidquran.fakes.FakeReadingBookmarksDao
 import com.quran.labs.androidquran.fakes.FakeRecentPagesDao
+import com.quran.labs.androidquran.fakes.FakeVerseNotesDao
 import com.quran.labs.androidquran.pages.data.madani.MadaniDataSource
 import com.quran.mobile.bookmark.importdata.BookmarkBackupImportNormalizer
 import com.quran.mobile.bookmark.importdata.MobileSyncImportData
@@ -41,6 +43,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.File
 import java.io.IOException
+import kotlinx.coroutines.runBlocking
 
 @Config(application = TestApplication::class, sdk = [33])
 @RunWith(RobolectricTestRunner::class)
@@ -50,6 +53,7 @@ class BookmarkImportExportModelTest {
   private lateinit var bookmarksDao: FakeBookmarksDao
   private lateinit var recentPagesDao: FakeRecentPagesDao
   private lateinit var readingBookmarksDao: FakeReadingBookmarksDao
+  private lateinit var verseNotesDao: FakeVerseNotesDao
   private lateinit var settings: FakeSettings
   private lateinit var quranInfo: QuranInfo
   private lateinit var mobileSyncImporter: FakeMobileSyncImporter
@@ -60,6 +64,7 @@ class BookmarkImportExportModelTest {
     bookmarksDao = FakeBookmarksDao()
     recentPagesDao = FakeRecentPagesDao()
     readingBookmarksDao = FakeReadingBookmarksDao()
+    verseNotesDao = FakeVerseNotesDao()
     settings = FakeSettings()
     quranInfo = QuranInfo(MadaniDataSource())
     mobileSyncImporter = FakeMobileSyncImporter()
@@ -73,6 +78,7 @@ class BookmarkImportExportModelTest {
       context,
       BookmarkJsonModel(),
       bookmarksDao,
+      verseNotesDao,
       recentPagesDao,
       readingBookmarksDao,
       settings,
@@ -140,6 +146,9 @@ class BookmarkImportExportModelTest {
         Bookmark(2L, null, null, 51, System.currentTimeMillis())
       )
     )
+    runBlocking {
+      verseNotesDao.saveNote(com.quran.data.model.SuraAyah(2, 255), "Exported note")
+    }
     recentPagesDao.setRecentPages(listOf(RecentPage(50, 1000), RecentPage(51, 900)))
     readingBookmarksDao.setReadingBookmark(PageReadingBookmark(42, timestamp = 1234))
 
@@ -154,6 +163,7 @@ class BookmarkImportExportModelTest {
 
     val exportedData = BookmarkJsonModel().fromJson(backupFile().source().buffer())
     assertThat(exportedData.bookmarks).containsExactly(ayahBookmark)
+    assertThat(exportedData.notes).containsExactly(VerseNote(2, 255, "Exported note", 1_000L))
     assertThat(exportedData.recentPages)
       .containsExactly(RecentPage(50, 1000), RecentPage(51, 900))
       .inOrder()
@@ -173,6 +183,9 @@ class BookmarkImportExportModelTest {
     bookmarksDao.setBookmarks(
       listOf(Bookmark(1L, 1, 1, 1, System.currentTimeMillis()))
     )
+    runBlocking {
+      verseNotesDao.saveNote(com.quran.data.model.SuraAyah(3, 100), "CSV note content")
+    }
     recentPagesDao.setRecentPages(listOf(RecentPage(12, 1000)))
     readingBookmarksDao.setReadingBookmark(PageReadingBookmark(12, timestamp = 999))
 
@@ -184,8 +197,10 @@ class BookmarkImportExportModelTest {
     testObserver.assertNoErrors()
     testObserver.assertValueCount(1)
     assertThat(testObserver.values()[0]).isNotNull()
-    assertThat(csvBackupFile().readText()).contains("recent,,, 12, 1000")
-    assertThat(csvBackupFile().readText()).contains("reading_bookmark, null, null, 12, 999")
+    val csvContent = csvBackupFile().readText()
+    assertThat(csvContent).contains("note, 3, 100, CSV note content")
+    assertThat(csvContent).contains("recent,,, 12, 1000")
+    assertThat(csvContent).contains("reading_bookmark, null, null, 12, 999")
   }
 
   @Test
@@ -332,6 +347,19 @@ class BookmarkImportExportModelTest {
     assertThat(readingBookmark.sura).isEqualTo(2)
     assertThat(readingBookmark.ayah).isEqualTo(255)
     assertThat(readingBookmark.timestampMillis).isEqualTo(1_000_000)
+  }
+
+  @Test
+  fun testImportNotes() {
+    importData(
+      BookmarkData(
+        notes = listOf(VerseNote(2, 255, "Imported note", 1000))
+      )
+    )
+
+    runBlocking {
+      assertThat(verseNotesDao.notes()).containsExactly(VerseNote(2, 255, "Imported note", 1000))
+    }
   }
 
   private fun importData(data: BookmarkData) {

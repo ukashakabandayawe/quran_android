@@ -146,9 +146,21 @@ class BookmarkPresenterTest {
   }
 
   private fun makeBookmarkPresenter(): BookmarkPresenter {
+    val fakeNotesDao = object : com.quran.data.dao.VerseNotesDao {
+      override val changes = kotlinx.coroutines.flow.emptyFlow()
+
+      override suspend fun notes(): List<com.quran.data.model.bookmark.VerseNote> = emptyList()
+      override suspend fun note(suraAyah: com.quran.data.model.SuraAyah): com.quran.data.model.bookmark.VerseNote? = null
+      override fun noteFlow(suraAyah: com.quran.data.model.SuraAyah): kotlinx.coroutines.flow.Flow<com.quran.data.model.bookmark.VerseNote?> = kotlinx.coroutines.flow.flowOf(null)
+      override suspend fun saveNote(suraAyah: com.quran.data.model.SuraAyah, note: String): Boolean = false
+      override suspend fun removeNote(suraAyah: com.quran.data.model.SuraAyah): Boolean = false
+      override suspend fun replaceNotes(notes: List<com.quran.data.model.bookmark.VerseNote>) {}
+    }
+
     return object : BookmarkPresenter(
       fakeBookmarksDao,
       fakeRecentPagesDao,
+      fakeNotesDao,
       quranSettings,
       { throw IllegalStateException("ArabicDatabaseUtils not wired up in test") },
     ) {

@@ -214,7 +214,8 @@ class QuranListAdapter(
   private fun isEnabled(position: Int): Boolean {
     val selected = elements[position]
     return !isEditable ||                     // anything in surahs or juzs
-        selected.isBookmark ||                // actual bookmarks
+      selected.isBookmark ||                // actual bookmarks
+      selected.isNote() ||                  // notes
         selected.rowType == QuranRow.NONE ||  // the actual "current page"
         selected.isBookmarkHeader             // tags
   }

@@ -11,4 +11,6 @@ sealed class BookmarkRowData {
   object PageBookmarksHeader : BookmarkRowData()
   object AyahBookmarksHeader : BookmarkRowData()
   object NotTaggedHeader : BookmarkRowData()
+  object NotesHeader : BookmarkRowData()
+  data class NoteItem(val note: com.quran.data.model.bookmark.VerseNote) : BookmarkRowData()
 }

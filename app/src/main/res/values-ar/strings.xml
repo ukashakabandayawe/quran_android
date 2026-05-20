@@ -232,6 +232,10 @@
   <!-- tag dialog -->
   <string name="tag_dlg_title">صنف</string>
   <string name="tag_name">اسم الصنف</string>
+  <string name="notes">ملاحظات</string>
+  <string name="note_hint">اكتب ملاحظة لهذه الآية</string>
+  <string name="save_note">حفظ الملاحظة</string>
+  <string name="clear_note">مسح الملاحظة</string>
 
   <!-- bookmark & tag list -->
   <string name="bookmarks_list_empty">لا توجد أي مرجعيات</string>

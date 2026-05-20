@@ -8,11 +8,13 @@ import java.io.IOException
 fun toCSV(sink: BufferedSink, bookmarks: BookmarkData) {
   val bookmarksName = "${bookmarks.bookmarks.firstOrNull()?.getCommaSeparatedNames()} \n"
   val bookmark = bookmarks.getBookmarksByLine() ?: ""
+  val notes = bookmarks.getNotesByLine() ?: ""
   val recentPages = bookmarks.getRecentPagesByLine() ?: ""
   val readingBookmark = bookmarks.getReadingBookmarkByLine() ?: ""
 
   sink.writeUtf8(bookmarksName)
   sink.writeUtf8(bookmark)
+  sink.writeUtf8(notes)
   sink.writeUtf8(recentPages)
   sink.writeUtf8(readingBookmark)
 }

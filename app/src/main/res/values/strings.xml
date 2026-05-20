@@ -218,13 +218,13 @@
   <string name="prefs_dual_page_mode_enabled">In landscape, two pages will appear side by side.</string>
   <string name="prefs_dual_page_mode_disabled">In landscape, only one page will appear.</string>
   <string name="prefs_category_advanced">Advanced Options</string>
-  <string name="prefs_category_advanced_summary">Import/export bookmarks, set Quran data directory, etc.</string>
+  <string name="prefs_category_advanced_summary">Import/export notes, bookmarks, and tags, set Quran data directory, etc.</string>
   <string name="prefs_import_title">Import</string>
-  <string name="prefs_import_summary">Import bookmarks and tags</string>
+  <string name="prefs_import_summary">Import notes, bookmarks and tags</string>
   <string name="prefs_export_title">Export</string>
-  <string name="prefs_export_summary">Export a copy of bookmarks and tags</string>
+  <string name="prefs_export_summary">Export a copy of notes, bookmarks and tags</string>
   <string name="prefs_export_csv_title">Export CSV</string>
-  <string name="prefs_export_csv_summary">Export a copy of bookmarks and tags in CSV</string>
+  <string name="prefs_export_csv_summary">Export a copy of notes, bookmarks and tags in CSV</string>
   <string name="prefs_page_type_title">Page Type (experimental)</string>
   <string name="prefs_page_type_summary">Select the type of reading pages</string>
   <string name="prefs_sura_translated_name_summary">Show the translation of surah name</string>
@@ -378,6 +378,10 @@
   <!-- tag dialog -->
   <string name="tag_dlg_title">Tag</string>
   <string name="tag_name">Name</string>
+  <string name="notes">Notes</string>
+  <string name="note_hint">Write a note for this verse</string>
+  <string name="save_note">Save note</string>
+  <string name="clear_note">Clear note</string>
   <string name="tag_blank_tag_error">Tag names cannot be blank!</string>
   <string name="tag_duplicate_tag_error">Tag name already exists!</string>
 
@@ -392,6 +396,7 @@
 
   <!-- format strings -->
   <string name="sura_ayah" translatable="false">%1$d:%2$d</string>
+  <string name="note_verse_ref" translatable="false">%1$d : %2$d</string>
 
   <!-- dual screen prefs -->
   <string name="prefs_category_dual_screen">Dual Page Preferences</string>

@@ -6,6 +6,7 @@ import com.squareup.moshi.JsonClass
 data class BookmarkData @JvmOverloads constructor(
   val tags: List<Tag> = emptyList(),
   val bookmarks: List<Bookmark> = emptyList(),
+  val notes: List<VerseNote> = emptyList(),
   val recentPages: List<RecentPage> = emptyList(),
   val readingBookmark: BackupReadingBookmark? = null,
   val pageType: String? = null
@@ -21,7 +22,13 @@ data class BookmarkData @JvmOverloads constructor(
           .map { "${it.getCommaSeparatedValues(tags)} \n" }
           .reduceOrNull { acc, bookmark -> "$acc$bookmark" }
 
+    fun getNotesByLine() =
+      notes
+        .map { "note, ${it.sura}, ${it.ayah}, ${it.note}, ${it.timestamp} \n" }
+        .reduceOrNull { acc, note -> "$acc$note" }
+
   fun getReadingBookmarkByLine() =
       readingBookmark?.let { "${it.getCommaSeparatedValues()} \n" }
 
 }
+

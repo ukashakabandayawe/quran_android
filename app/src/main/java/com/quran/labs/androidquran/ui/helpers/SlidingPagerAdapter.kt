@@ -41,6 +41,15 @@ class SlidingPagerAdapter(
     return pages[pos].newAyahActionFragment()
   }
 
+  /**
+   * Find the pager index for a provider with the given order value.
+   * Returns -1 if not found.
+   */
+  fun getIndexForOrder(order: Int): Int {
+    val idx = pages.indexOfFirst { it.order == order }
+    return if (idx == -1) -1 else getPagePosition(idx)
+  }
+
   fun getPagePosition(page: Int): Int {
     return if (isRtl) pages.size - 1 - page else page
   }
