@@ -298,7 +298,7 @@ class BookmarksFragment : Fragment(), QuranTouchListener {
       if (row.isAyahBookmark) {
         quranActivity.jumpToAndHighlight(row.page, row.sura, row.ayah)
       } else if (row.isNote()) {
-        quranActivity.jumpTo(row.page)
+        quranActivity.jumpToAndHighlight(row.page, row.sura, row.ayah)
       } else {
         quranActivity.jumpTo(row.page)
       }
