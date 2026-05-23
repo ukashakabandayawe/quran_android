@@ -223,7 +223,7 @@ class BookmarksFragment : Fragment(), QuranTouchListener {
   }
 
   private fun isValidSelection(selected: QuranRow): Boolean {
-    return selected.isBookmark || (selected.isBookmarkHeader && selected.tagId >= 0)
+    return selected.isBookmark || selected.isNote() || (selected.isBookmarkHeader && selected.tagId >= 0)
   }
 
   private val mOnUndoClickListener: View.OnClickListener = View.OnClickListener {

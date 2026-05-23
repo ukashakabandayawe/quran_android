@@ -9,6 +9,7 @@ import com.quran.labs.androidquran.BookmarksDatabase
 import com.quran.labs.androidquran.database.BookmarksDBAdapter
 import com.quran.mobile.bookmark.Bookmarks
 import com.quran.mobile.bookmark.Last_pages
+import com.quran.mobile.bookmark.Notes
 import com.quran.labs.androidquran.base.TestApplication
 import com.quran.labs.test.RxSchedulerRule
 import org.junit.Before
@@ -43,7 +44,8 @@ class BookmarkModelTest {
     database = BookmarksDatabase(
       driver,
       Bookmarks.Adapter(IntColumnAdapter, IntColumnAdapter, IntColumnAdapter),
-      Last_pages.Adapter(IntColumnAdapter)
+      Last_pages.Adapter(IntColumnAdapter),
+      Notes.Adapter(IntColumnAdapter, IntColumnAdapter)
     )
     bookmarksAdapter = BookmarksDBAdapter(database)
     model = BookmarkModel(bookmarksAdapter)

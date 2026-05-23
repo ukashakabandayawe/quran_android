@@ -13,13 +13,13 @@
       android:orientation="vertical">
 
     <TextView
-      android:id="@+id/verse_ref"
+      android:id="@+id/verse_reference"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:textStyle="bold"
       android:layout_marginBottom="8dp"
-      android:textColor="@color/text_primary" />
+      android:textColor="@color/default_text"
+      android:textStyle="bold"
+      android:textAlignment="viewEnd" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"

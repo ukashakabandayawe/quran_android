@@ -5,6 +5,7 @@ import androidx.annotation.VisibleForTesting
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.quran.data.dao.BookmarksDao
 import com.quran.data.dao.RecentPagesDao
+import com.quran.data.model.SuraAyah
 import com.quran.data.model.bookmark.Bookmark
 import com.quran.data.model.bookmark.BookmarkData
 import com.quran.data.model.bookmark.RecentPage
@@ -135,6 +136,10 @@ open class BookmarkPresenter @Inject internal constructor(
   fun getContextualOperationsForItems(rows: List<QuranRow>): BooleanArray {
     val headers = rows.count { row -> row.isBookmarkHeader }
     val bookmarks = rows.count { row -> row.isBookmark }
+    val notes = rows.count { row -> row.isNote() }
+    if (notes > 0) {
+      return booleanArrayOf(false, true, false)
+    }
     return booleanArrayOf(
       headers == 1 && bookmarks == 0,
       (headers + bookmarks) > 0,
@@ -199,6 +204,7 @@ open class BookmarkPresenter @Inject internal constructor(
     val cachedRows = currentData.rows
 
     val bookmarkIdsToRemove = mutableSetOf<Long>()
+    val notesToRemove = mutableSetOf<SuraAyah>()
     val tagIdsToUntag = mutableSetOf<Long>()
     val bookmarkTagContext = mutableMapOf<Long, MutableSet<Long>>()
 
@@ -215,12 +221,17 @@ open class BookmarkPresenter @Inject internal constructor(
           }
         }
 
+        row.isNote() && row.sura > 0 && row.ayah > 0 -> {
+          notesToRemove.add(SuraAyah(row.sura, row.ayah))
+        }
+
         row.isBookmarkHeader && row.tagId > 0 -> tagIdsToUntag.add(row.tagId)
       }
     }
 
     val filteredRows = mutableListOf<BookmarkRowData>()
     val removedBookmarks = mutableSetOf<Bookmark>()
+    val removedNotes = mutableSetOf<SuraAyah>()
     var haveUntaggedSection = false
 
     for (rowData in cachedRows) {
@@ -247,6 +258,15 @@ open class BookmarkPresenter @Inject internal constructor(
             filteredRows += rowData
           } else {
             removedBookmarks += rowData.bookmark
+          }
+        }
+
+        is BookmarkRowData.NoteItem -> {
+          val noteKey = SuraAyah(rowData.note.sura, rowData.note.ayah)
+          if (notesToRemove.contains(noteKey)) {
+            removedNotes.add(noteKey)
+          } else {
+            filteredRows += rowData
           }
         }
 
@@ -292,6 +312,10 @@ open class BookmarkPresenter @Inject internal constructor(
       }
     }
 
+    if (removedNotes.isNotEmpty()) {
+      // notes are removed directly and do not affect the bookmark/tag sections
+    }
+
     val filteredTagMap = currentData.tagMap.toMutableMap().apply {
       tagIdsToUntag.forEach { remove(it) }
     }
@@ -307,6 +331,7 @@ open class BookmarkPresenter @Inject internal constructor(
       runBlocking {
         val tagsToDelete = mutableListOf<Tag>()
         val bookmarksToDelete = mutableListOf<Bookmark>()
+        val notesToDelete = mutableListOf<SuraAyah>()
         val bookmarksToUntag = mutableListOf<Pair<Bookmark, Long>>()
 
         items.forEach { row ->
@@ -322,6 +347,10 @@ open class BookmarkPresenter @Inject internal constructor(
                 bookmarksToDelete += row.bookmark
               }
             }
+
+            row.isNote() && row.sura > 0 && row.ayah > 0 -> {
+              notesToDelete += SuraAyah(row.sura, row.ayah)
+            }
           }
         }
 
@@ -330,6 +359,7 @@ open class BookmarkPresenter @Inject internal constructor(
           bookmarksDao.removeBookmarkFromTag(bookmark, tagId)
         }
         bookmarksDao.removeBookmarks(bookmarksToDelete)
+        notesToDelete.distinct().forEach { verseNotesDao.removeNote(it) }
       }
     }.flatMap {
       getBookmarksListObservable(sortOrder, isGroupedByTags)

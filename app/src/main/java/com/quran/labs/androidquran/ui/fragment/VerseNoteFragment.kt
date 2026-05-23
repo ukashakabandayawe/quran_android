@@ -7,18 +7,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import com.quran.data.model.SuraAyah
 import com.google.android.material.textfield.TextInputEditText
 import com.quran.labs.androidquran.R
 import com.quran.labs.androidquran.presenter.notes.VerseNotePresenter
 import com.quran.labs.androidquran.ui.PagerActivity
 import com.quran.labs.androidquran.ui.helpers.SlidingPagerAdapter
+import com.quran.labs.androidquran.util.QuranUtils
 import com.quran.mobile.di.AyahActionFragmentProvider
 import dev.zacsweers.metro.Inject
 
 class VerseNoteFragment : AyahActionFragment() {
   private lateinit var noteInput: TextInputEditText
-  private lateinit var verseRef: TextView
+  private lateinit var verseReference: TextView
   private var pendingNoteText: String? = null
 
   @Inject
@@ -41,14 +41,13 @@ class VerseNoteFragment : AyahActionFragment() {
     savedInstanceState: Bundle?
   ): View? {
     val view = inflater.inflate(R.layout.verse_note_panel, container, false)
+    verseReference = view.findViewById(R.id.verse_reference)
     noteInput = view.findViewById(R.id.note_input)
-    verseRef = view.findViewById(R.id.verse_ref)
     val saveButton = view.findViewById<Button>(R.id.save_note)
     val clearButton = view.findViewById<Button>(R.id.clear_note)
 
+    start?.let { setVerseReference(it.sura, it.ayah) }
     pendingNoteText?.let { setNoteText(it) }
-    // Populate the current verse reference when the view is first created.
-    updateVerseReference(start)
 
     saveButton.setOnClickListener {
       notePresenter.saveNote(noteInput.text?.toString().orEmpty())
@@ -72,8 +71,10 @@ class VerseNoteFragment : AyahActionFragment() {
   }
 
   override fun refreshView() {
-    updateVerseReference(start)
-    start?.let { notePresenter.setVerse(it.sura, it.ayah) }
+    start?.let {
+      setVerseReference(it.sura, it.ayah)
+      notePresenter.setVerse(it.sura, it.ayah)
+    }
   }
 
   fun bindNote(note: String) {
@@ -92,14 +93,9 @@ class VerseNoteFragment : AyahActionFragment() {
     pendingNoteText = null
   }
 
-  private fun updateVerseReference(suraAyah: SuraAyah?) {
-    if (!this::verseRef.isInitialized || suraAyah == null) {
-      return
+  private fun setVerseReference(sura: Int, ayah: Int) {
+    if (this::verseReference.isInitialized) {
+      verseReference.text = "${QuranUtils.getLocalizedNumber(sura)}:${QuranUtils.getLocalizedNumber(ayah)}"
     }
-    verseRef.text = resources.getString(
-      R.string.note_verse_ref,
-      suraAyah.sura,
-      suraAyah.ayah
-    )
   }
 }

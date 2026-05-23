@@ -130,6 +130,23 @@ class BookmarkPresenterTest {
   }
 
   @Test
+  fun `contextual actions allow deleting note rows`() {
+    val presenter = makeBookmarkPresenter()
+    val noteResult = presenter.getContextualOperationsForItems(
+      listOf(
+        QuranRow.Builder()
+          .withType(QuranRow.NOTE)
+          .withSura(1)
+          .withAyah(2)
+          .withPage(1)
+          .build()
+      )
+    )
+
+    assertThat(noteResult.asList()).containsExactly(false, true, false).inOrder()
+  }
+
+  @Test
   fun `location sort delegates to bookmarks dao`() {
     fakeBookmarksDao.setBookmarks(
       listOf(
@@ -147,7 +164,7 @@ class BookmarkPresenterTest {
 
   private fun makeBookmarkPresenter(): BookmarkPresenter {
     val fakeNotesDao = object : com.quran.data.dao.VerseNotesDao {
-      override val changes = kotlinx.coroutines.flow.emptyFlow()
+      override val changes = kotlinx.coroutines.flow.emptyFlow<Unit>()
 
       override suspend fun notes(): List<com.quran.data.model.bookmark.VerseNote> = emptyList()
       override suspend fun note(suraAyah: com.quran.data.model.SuraAyah): com.quran.data.model.bookmark.VerseNote? = null
